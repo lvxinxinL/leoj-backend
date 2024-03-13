@@ -1,5 +1,6 @@
 package icu.leshine.leoj.service;
 
+import icu.leshine.leoj.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import icu.leshine.leoj.model.entity.QuestionSubmit;
 import com.baomidou.mybatisplus.extension.service.IService;
 import icu.leshine.leoj.model.entity.User;
@@ -14,18 +15,9 @@ public interface QuestionSubmitService extends IService<QuestionSubmit> {
     /**
      * 提交
      *
-     * @param postId
+     * @param questionSubmitAddRequest
      * @param loginUser
      * @return
      */
-    int doQuestionSubmit(long postId, User loginUser);
-
-    /**
-     * 题目提交（内部服务）
-     *
-     * @param userId
-     * @param postId
-     * @return
-     */
-    int doQuestionSubmitInner(long userId, long postId);
+    long doQuestionSubmit(QuestionSubmitAddRequest questionSubmitAddRequest, User loginUser);
 }

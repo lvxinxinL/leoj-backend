@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import icu.leshine.leoj.common.ErrorCode;
 import icu.leshine.leoj.exception.BusinessException;
+import icu.leshine.leoj.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import icu.leshine.leoj.model.entity.Question;
 import icu.leshine.leoj.model.entity.QuestionSubmit;
 import icu.leshine.leoj.model.entity.User;
+import icu.leshine.leoj.model.enums.QuestionSubmitStatusEnum;
 import icu.leshine.leoj.service.QuestionService;
 import icu.leshine.leoj.service.QuestionSubmitService;
 import icu.leshine.leoj.mapper.QuestionSubmitMapper;
@@ -29,75 +31,35 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     private QuestionService questionService;
 
     /**
-     * 点赞
+     * 提交题目
      *
-     * @param questionId
+     * @param questionSubmitAddRequest
      * @param loginUser
      * @return
      */
     @Override
-    public int doQuestionSubmit(long questionId, User loginUser) {
+    public long doQuestionSubmit(QuestionSubmitAddRequest questionSubmitAddRequest, User loginUser) {
         // 判断实体是否存在，根据类别获取实体
+        long questionId = questionSubmitAddRequest.getQuestionId();
         Question question = questionService.getById(questionId);
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        // 是否已点赞
+        // 是否已提交
         long userId = loginUser.getId();
-        // 每个用户串行点赞
-        // 锁必须要包裹住事务方法
-        QuestionSubmitService questionSubmitService = (QuestionSubmitService) AopContext.currentProxy();
-        synchronized (String.valueOf(userId).intern()) {
-            return questionSubmitService.doQuestionSubmitInner(userId, questionId);
-        }
-    }
-
-    /**
-     * 封装了事务的方法
-     *
-     * @param userId
-     * @param questionId
-     * @return
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public int doQuestionSubmitInner(long userId, long questionId) {
         QuestionSubmit questionSubmit = new QuestionSubmit();
         questionSubmit.setUserId(userId);
         questionSubmit.setQuestionId(questionId);
-        QueryWrapper<QuestionSubmit> thumbQueryWrapper = new QueryWrapper<>(questionSubmit);
-        QuestionSubmit oldQuestionSubmit = this.getOne(thumbQueryWrapper);
-        boolean result;
-        // 已点赞
-        if (oldQuestionSubmit != null) {
-            result = this.remove(thumbQueryWrapper);
-            if (result) {
-                // 点赞数 - 1
-                result = questionService.update()
-                        .eq("id", questionId)
-                        .gt("thumbNum", 0)
-                        .setSql("thumbNum = thumbNum - 1")
-                        .update();
-                return result ? -1 : 0;
-            } else {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-            }
-        } else {
-            // 未点赞
-            result = this.save(questionSubmit);
-            if (result) {
-                // 点赞数 + 1
-                result = questionService.update()
-                        .eq("id", questionId)
-                        .setSql("thumbNum = thumbNum + 1")
-                        .update();
-                return result ? 1 : 0;
-            } else {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-            }
+        questionSubmit.setCode(questionSubmitAddRequest.getCode());
+        // 设置题目状态
+        questionSubmit.setStatus(QuestionSubmitStatusEnum.WAITING.getValue());
+        questionSubmit.setJudgeInfo("{}");
+        boolean save = this.save(questionSubmit);
+        if (!save) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "数据插入失败");
         }
+        return questionSubmit.getId();
     }
-
 }
 
 
