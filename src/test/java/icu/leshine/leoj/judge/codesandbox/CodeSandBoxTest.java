@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * 测试代码沙箱
@@ -31,4 +32,20 @@ class CodeSandBoxTest {
         codeSandBox.executeCode(executeCodeRequest);
     }
 
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        while (scanner.hasNext()) {
+            String type = scanner.next();
+            CodeSandBox codeSandBox = CodeSandBoxFactory.newInstance(type);// 面向接口/抽象编程
+            List<String> inputList = Arrays.asList("1 2", "3 4");
+            String code = "int main() {}";
+            String language = "java";
+            ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
+                    .inputList(inputList)
+                    .code(code)
+                    .language(language)
+                    .build();
+            codeSandBox.executeCode(executeCodeRequest);
+        }
+    }
 }
