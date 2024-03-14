@@ -9,9 +9,11 @@ import icu.leshine.leoj.judge.codesandbox.CodeSandBoxFactory;
 import icu.leshine.leoj.judge.codesandbox.CodeSandBoxProxy;
 import icu.leshine.leoj.judge.codesandbox.entity.ExecuteCodeRequest;
 import icu.leshine.leoj.judge.codesandbox.entity.ExecuteCodeResponse;
-import icu.leshine.leoj.judge.strategy.impl.DefaultJudgeStrategyService;
+import icu.leshine.leoj.judge.strategy.JudgeManager;
+import icu.leshine.leoj.judge.strategy.impl.DefaultJudgeStrategy;
 import icu.leshine.leoj.judge.strategy.JudgeContext;
 import icu.leshine.leoj.judge.strategy.JudgeStrategyService;
+import icu.leshine.leoj.judge.strategy.impl.JavaLangJudgeStrategy;
 import icu.leshine.leoj.model.dto.question.JudgeCase;
 import icu.leshine.leoj.model.dto.questionsubmit.JudgeInfo;
 import icu.leshine.leoj.model.entity.Question;
@@ -43,12 +45,14 @@ public class JudgeServiceImpl implements JudgeService{
     @Resource
     private QuestionSubmitService questionSubmitService;
 
+    @Resource
+    private JudgeManager judgeManager;
 
     @Value("${codesandbox.type:example}")
     private String type;// 读取配置文件
 
     @Override
-    public QuestionSubmitVO doJudge(long questionSubmitId) {
+    public QuestionSubmit doJudge(long questionSubmitId) {
         // 1. 校验题目信息、题目提交信息、题目提交状态
         QuestionSubmit questionSubmit = questionSubmitService.getById(questionSubmitId);
         if (questionSubmit == null) {
@@ -88,7 +92,6 @@ public class JudgeServiceImpl implements JudgeService{
         ExecuteCodeResponse executeCodeResponse = codeSandBox.executeCode(executeCodeRequest);
 
         // 4. 使用判题策略，判断沙箱的执行结果是否符合题目答案
-        JudgeStrategyService judgeStrategyService = new DefaultJudgeStrategyService();
         JudgeContext judgeContext = new JudgeContext();
         judgeContext.setQuestion(question);
         judgeContext.setQuestionSubmit(questionSubmit);
@@ -97,7 +100,8 @@ public class JudgeServiceImpl implements JudgeService{
         List<String> outputList = executeCodeResponse.getOutputList();
         judgeContext.setOutputList(outputList);
         judgeContext.setJudgeCaseList(judgeCaseList);
-        JudgeInfo judgeInfo = judgeStrategyService.doJudge(judgeContext);//传入封装的上下文对象，执行判题
+        // 让 JudgeManager 选择判题策略
+        JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);//传入封装的上下文对象，执行判题
 
         // 5. 修改数据库的题目提交信息
         questionSubmitUpdate = new QuestionSubmit();
@@ -109,8 +113,6 @@ public class JudgeServiceImpl implements JudgeService{
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新失败");
         }
         QuestionSubmit questionSubmitResult = questionSubmitService.getById(questionSubmitId);
-        QuestionSubmitVO questionSubmitVO = new QuestionSubmitVO();
-        BeanUtil.copyProperties(questionSubmitResult, questionSubmitVO);
-        return questionSubmitVO;
+        return questionSubmitResult;
     }
 }

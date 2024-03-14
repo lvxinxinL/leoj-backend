@@ -1,4 +1,5 @@
 package icu.leshine.leoj.judge.codesandbox.impl;
+import java.util.Arrays;
 import java.util.List;
 
 import icu.leshine.leoj.judge.codesandbox.CodeSandBox;
@@ -21,7 +22,8 @@ public class ExampleCodeSandBox implements CodeSandBox {
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
         List<String> inputList = executeCodeRequest.getInputList();
         ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
-        executeCodeResponse.setOutputList(inputList);
+        List<String> outputList = Arrays.asList("新的输出用例");
+        executeCodeResponse.setOutputList(outputList);
         executeCodeResponse.setMessage("测试执行成功");
         executeCodeResponse.setStatus(QuestionSubmitStatusEnum.SUCCEED.getValue());
         JudgeInfo judgeInfo = new JudgeInfo();

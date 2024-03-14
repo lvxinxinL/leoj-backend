@@ -1,6 +1,6 @@
 package icu.leshine.leoj.judge;
 
-import icu.leshine.leoj.model.vo.QuestionSubmitVO;
+import icu.leshine.leoj.model.entity.QuestionSubmit;
 
 /**
  * 判题服务
@@ -17,5 +17,5 @@ public interface JudgeService {
      * @param questionSubmitId
      * @return
      */
-    QuestionSubmitVO doJudge(long questionSubmitId);
+    QuestionSubmit doJudge(long questionSubmitId);
 }

@@ -2,7 +2,6 @@ package icu.leshine.leoj.judge;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.annotation.Resource;
 

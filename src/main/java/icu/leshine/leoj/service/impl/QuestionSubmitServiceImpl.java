@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import icu.leshine.leoj.common.ErrorCode;
 import icu.leshine.leoj.constant.CommonConstant;
 import icu.leshine.leoj.exception.BusinessException;
+import icu.leshine.leoj.judge.JudgeService;
+import icu.leshine.leoj.judge.strategy.JudgeContext;
 import icu.leshine.leoj.mapper.QuestionSubmitMapper;
 import icu.leshine.leoj.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import icu.leshine.leoj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
@@ -22,10 +24,12 @@ import icu.leshine.leoj.service.UserService;
 import icu.leshine.leoj.utils.SqlUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +46,10 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
 
     @Resource
     private UserService userService;
+
+    @Resource
+    @Lazy
+    private JudgeService judgeService;
 
     /**
      * 提交题目
@@ -78,7 +86,13 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (!save) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "数据插入失败");
         }
-        return questionSubmit.getId();
+
+        Long questionSubmitId = questionSubmit.getId();
+        // 异步执行判题业务
+        CompletableFuture.runAsync(() -> {
+            judgeService.doJudge(questionSubmitId);
+        });
+        return questionSubmitId;
     }
 
 

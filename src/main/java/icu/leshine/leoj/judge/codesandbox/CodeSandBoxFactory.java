@@ -4,8 +4,6 @@ import icu.leshine.leoj.judge.codesandbox.impl.ExampleCodeSandBox;
 import icu.leshine.leoj.judge.codesandbox.impl.RemoteCodeSandBox;
 import icu.leshine.leoj.judge.codesandbox.impl.ThirdPartySandBox;
 
-import java.util.Scanner;
-
 /**
  * 代码沙箱工厂
  *

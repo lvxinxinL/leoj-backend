@@ -1,7 +1,6 @@
 package icu.leshine.leoj.judge.strategy.impl;
 
 import cn.hutool.json.JSONUtil;
-import icu.leshine.leoj.judge.codesandbox.entity.ExecuteCodeResponse;
 import icu.leshine.leoj.judge.strategy.JudgeContext;
 import icu.leshine.leoj.judge.strategy.JudgeStrategyService;
 import icu.leshine.leoj.model.dto.question.JudgeCase;
@@ -20,7 +19,7 @@ import java.util.List;
  * @version 1.0
  * @Date 2024-03-14-14:58
  */
-public class DefaultJudgeStrategyService implements JudgeStrategyService {
+public class DefaultJudgeStrategy implements JudgeStrategyService {
 
     /**
      * 执行判题
