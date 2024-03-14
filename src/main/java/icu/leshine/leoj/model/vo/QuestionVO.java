@@ -52,16 +52,6 @@ public class QuestionVO implements Serializable {
     private JudgeConfig judgeConfig;
 
     /**
-     * 点赞数
-     */
-    private Integer thumbNum;
-
-    /**
-     * 收藏数
-     */
-    private Integer favourNum;
-
-    /**
      * 创建用户 id
      */
     private Long userId;
@@ -82,7 +72,7 @@ public class QuestionVO implements Serializable {
     private UserVO userVO;
 
     /**
-     * todo 包装类转对象
+     * 包装类转对象
      *
      * @param questionVO
      * @return
@@ -105,7 +95,7 @@ public class QuestionVO implements Serializable {
     }
 
     /**
-     * todo 对象转包装类
+     * 对象转包装类
      *
      * @param question
      * @return
